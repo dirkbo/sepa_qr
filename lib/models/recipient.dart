@@ -13,5 +13,4 @@ class PaymentRecipient {
     this.currency : "EUR"
   });
 
-
 }

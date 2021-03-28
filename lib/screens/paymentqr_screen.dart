@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:money_qr/providers/payment_provider.dart';
 import 'package:money_qr/screens/edit_payment_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../models/payment.dart';
@@ -20,6 +22,8 @@ class MoneyQRHomePage extends StatefulWidget {
 class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
   SepaPayment paymentData = SepaPayment();
   String qrData;
+  bool _isInit = false;
+  PaymentProvider paymentProvider;
 
   @override
   void initState() {
@@ -36,6 +40,19 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
       qrData = paymentData.qrData;
     }
   }
+
+  @override
+  void didChangeDependencies() {
+    if (!_isInit) {
+      paymentProvider = Provider.of<PaymentProvider>(context, listen: true);
+      Future.delayed(Duration(milliseconds: 200), () async { await paymentProvider.getFromPrefs(); });
+      _isInit = true;
+    }
+    paymentData = paymentProvider.getPayment;
+    updateQrData();
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     print(paymentData.valid);
@@ -54,7 +71,7 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text("Deine Überweisung", style: _theme.textTheme.headline4),
+                      Text("Deine Überweisung", style: _theme.textTheme.headline5, softWrap: true,),
                     ],),
                   const SizedBox(height: 16.0),
                   Row(
@@ -99,7 +116,7 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
                     gapless: false,
                   ),
                   const SizedBox(height: 16.0,),
-                  Text("Scanne den QR-Code mit deiner Banking App, um die Überwesiungsdaten zu übernehmen und die Überweisung abzuschließen", softWrap: true,),
+                  Text("Scanne den QR-Code mit deiner Banking App, um die Überweisungsdaten zu übernehmen und die Überweisung abzuschließen", softWrap: true,),
                 ],
               ),
             ),
