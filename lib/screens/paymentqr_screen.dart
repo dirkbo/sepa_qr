@@ -55,7 +55,6 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(paymentData.valid);
     final ThemeData _theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
