@@ -3,28 +3,29 @@ import 'package:flutter/foundation.dart';
 import '../models/payment.dart';
 
 class PaymentProvider with ChangeNotifier {
-  SepaPayment payment;
+  SepaPayment _payment;
 
   PaymentProvider() {
-    payment = new SepaPayment();
+    _payment = new SepaPayment();
   }
 
-  Future<void> getFromPrefs() async {
+  Future<void> getFromPrefs({bool doNotify: true}) async {
     final SepaPayment newPayment = await SepaPayment.getFromPrefs;
-    payment = newPayment;
-    notifyListeners();
+    _payment = newPayment;
+    if (doNotify)
+      notifyListeners();
   }
 
   Future<void> savePayment() async {
-    await payment.saveToPrefs();
+    await _payment.saveToPrefs();
   }
 
-  SepaPayment get getPayment {
-    return payment;
+  SepaPayment get payment {
+    return _payment;
   }
 
   void update(SepaPayment newPayment) {
-    payment = newPayment;
+    _payment = newPayment;
     notifyListeners();
   }
 }

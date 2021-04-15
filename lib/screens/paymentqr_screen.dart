@@ -45,10 +45,10 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
   void didChangeDependencies() {
     if (!_isInit) {
       paymentProvider = Provider.of<PaymentProvider>(context, listen: true);
-      Future.delayed(Duration(milliseconds: 200), () async { await paymentProvider.getFromPrefs(); });
+      Future.delayed(Duration(milliseconds: 200), () async { await paymentProvider.getFromPrefs(doNotify: true); });
       _isInit = true;
     }
-    paymentData = paymentProvider.getPayment;
+    paymentData = paymentProvider.payment;
     updateQrData();
     super.didChangeDependencies();
   }

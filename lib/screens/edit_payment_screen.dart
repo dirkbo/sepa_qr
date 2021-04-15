@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:money_qr/models/payment.dart';
 import 'package:money_qr/providers/payment_provider.dart';
+import 'package:money_qr/screens/recipients_list_screen.dart';
 import 'package:provider/provider.dart';
 
 class EditPaymentScreen extends StatefulWidget {
@@ -14,8 +15,8 @@ class EditPaymentScreen extends StatefulWidget {
 class _EditPaymentScreenState extends State<EditPaymentScreen> {
   final _paymentFormKey = GlobalKey<FormState>();
 
-  SepaPayment payment;
-  PaymentProvider paymentProvider;
+  SepaPayment _payment;
+  PaymentProvider _paymentProvider;
   bool _isInit = false;
   bool _isValid = false;
 
@@ -31,24 +32,27 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
 
   Future<void> savePayment() async {
     _paymentFormKey.currentState.save();
-    paymentProvider.update(payment);
-    await paymentProvider.savePayment();
+    _paymentProvider.update(_payment);
+    await _paymentProvider.savePayment();
   }
 
   @override
   void didChangeDependencies() {
     if (!_isInit) {
-      paymentProvider = Provider.of<PaymentProvider>(context, listen: false);
+      _paymentProvider = Provider.of<PaymentProvider>(context, listen: true);
       _isInit = true;
     }
-    payment = paymentProvider.getPayment;
-    _isValid = payment.valid;
+    print("DidChange Edit Dependencies");
+    _payment = _paymentProvider.payment;
+    _isValid = _payment.valid;
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData _theme = Theme.of(context);
+    if (_paymentProvider.payment != null)
+      _payment = _paymentProvider.payment;
     return Scaffold(
       appBar: AppBar(
         title: Text("Zahlung bearbeiten"),
@@ -64,29 +68,45 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 child: Column(children: [
                   Text("Bearbeiten", style: _theme.textTheme.headline5,),
                   const SizedBox(height: 16.0),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: "An"),
-                    textInputAction: TextInputAction.next,
-                    initialValue: payment.recipient,
-                    validator: (value) {
-                      String sanitizedVal = value.trim();
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 5)
-                        return 'Empfänger angeben';
-                      return null;
-                    },
-                    onSaved: (value) {
-                      String sanitizedVal = value.trim();
-                      payment.recipient = sanitizedVal;
-                    },
-                    onChanged: (value) {checkValid(); },
+                  Row(
+                    children: [
+                      Flexible(
+                        child: TextFormField(
+                          decoration: InputDecoration(labelText: "An"),
+                          textInputAction: TextInputAction.next,
+                          initialValue: _payment.recipient,
+                          validator: (value) {
+                            String sanitizedVal = value.trim();
+                            if (sanitizedVal.isEmpty || sanitizedVal.length < 5)
+                              return 'Empfänger angeben';
+                            return null;
+                          },
+                          onSaved: (value) {
+                            String sanitizedVal = value.trim();
+                            _payment.recipient = sanitizedVal;
+                          },
+                          onChanged: (value) {checkValid(); },
+                        ),
+                      ),
+                      IconButton(icon: Icon(Icons.contacts), onPressed: () async {
+                        final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => RecipientsListScreen())
+                        );
+                        if (result != null) {
+                          _paymentProvider.update(result);
+                          _paymentFormKey.currentState.reset();
+                        }
+                      }),
+                    ],
                   ),
                   const SizedBox(height: 8.0),
                   TextFormField(
                     decoration: InputDecoration(labelText: "IBAN"),
                     textInputAction: TextInputAction.next,
-                    initialValue: payment.iban,
+                    initialValue: _payment.iban,
                     validator: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value.trim().replaceAll(' ', '');
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 15)
                         return 'IBAN muss mindestens 15 Zeichen lang sein';
                       if (sanitizedVal.length > 32)
@@ -97,7 +117,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                     },
                     onSaved: (value) {
                       String sanitizedVal = value.trim();
-                      payment.iban = sanitizedVal;
+                      _payment.iban = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
                   ),
@@ -105,7 +125,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                   TextFormField(
                     decoration: InputDecoration(labelText: "BIC / SWIFT"),
                     textInputAction: TextInputAction.next,
-                    initialValue: payment.bic,
+                    initialValue: _payment.bic,
                     validator: (value) {
                       String sanitizedVal = value.trim();
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
@@ -118,7 +138,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                     },
                     onSaved: (value) {
                       String sanitizedVal = value.trim();
-                      payment.bic = sanitizedVal;
+                      _payment.bic = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
                   ),
@@ -131,7 +151,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                         child: TextFormField(
                           decoration: InputDecoration(labelText: "Währung"),
                           textInputAction: TextInputAction.next,
-                          initialValue: payment.currency,
+                          initialValue: _payment.currency,
                           validator: (value) {
                             String sanitizedVal = value.trim();
                             if (sanitizedVal.isEmpty || sanitizedVal.length < 3)
@@ -144,7 +164,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                           },
                           onSaved: (value) {
                             String sanitizedVal = value.trim().toUpperCase();
-                            payment.currency = sanitizedVal;
+                            _payment.currency = sanitizedVal;
                           },
                           onChanged: (value) {checkValid(); },
                         ),
@@ -155,22 +175,16 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                           textInputAction: TextInputAction.done,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(labelText: "Betrag"),
-                          initialValue: payment.amount.toString(),
+                          initialValue: _payment.amount.toString(),
                           validator: (value) {
                             String sanitizedVal = value.trim();
-                            if (sanitizedVal.isEmpty || sanitizedVal.length < 3)
-                              return 'Währung muss mindestens 3 Zeichen lang sein';
-                            //if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
-                            //  return 'BIC darf 8 oder  11 Zeichen lang sein';
-                            //if (!SepaPayment.isValidIBAN(sanitizedVal))
-                            //  return "BIC ist ungültig!";
                             if (double.tryParse(sanitizedVal) == null)
                               return "Betrag muss eine Zahl sein!";
                             return null;
                           },
                           onSaved: (value) {
                             String sanitizedVal = value.trim();
-                            payment.amount = double.tryParse(sanitizedVal);
+                            _payment.amount = double.tryParse(sanitizedVal);
                           },
                           onChanged: (value) {checkValid(); },
                         ),
@@ -180,7 +194,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                   const SizedBox(height: 8.0),
                   TextFormField(
                     decoration: InputDecoration(labelText: "Nachricht"),
-                    initialValue: payment.message,
+                    initialValue: _payment.message,
                     validator: (value) {
                       String sanitizedVal = value.trim();
                       //if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
@@ -193,7 +207,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                     },
                     onSaved: (value) {
                       String sanitizedVal = value.trim();
-                      payment.message = sanitizedVal;
+                      _payment.message = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
                   ),

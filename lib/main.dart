@@ -4,6 +4,7 @@ import 'package:money_qr/screens/edit_payment_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/paymentqr_screen.dart';
+import 'screens/recipients_list_screen.dart';
 
 void main() {
   runApp(
@@ -23,7 +24,6 @@ class MoneyQR extends StatelessWidget {
     return MaterialApp(
       title: 'Money QR',
       theme: ThemeData(primarySwatch: Colors.blue,),
-
       routes: {
         MoneyQRHomePage.routeName: (ctx) => MoneyQRHomePage(title: "Money QR",),
         EditPaymentScreen.routeName: (ctx) => EditPaymentScreen(),

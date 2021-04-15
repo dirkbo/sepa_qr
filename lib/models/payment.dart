@@ -1,4 +1,5 @@
 import 'package:iban/iban.dart' as IBAN;
+import 'package:money_qr/models/recipient.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SepaPayment {
@@ -17,6 +18,15 @@ class SepaPayment {
     this.amount : 0.00,
     this.currency : "EUR"
   });
+
+  SepaPayment.fromRecipient(PaymentRecipient recipient)
+    : iban = recipient.iban,
+      bic = recipient.bic,
+      recipient = recipient.name,
+      currency = recipient.currency,
+      amount = 0.0,
+      message = ""
+  ;
 
   bool get valid {
     if (iban == null) return false;
@@ -49,6 +59,10 @@ class SepaPayment {
       n = new SepaPayment();
     }
     return n;
+  }
+
+  String toString() {
+    return "$recipient $iban $bic $message $currency $amount";
   }
 
   String get qrData {
