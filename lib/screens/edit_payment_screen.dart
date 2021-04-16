@@ -1,19 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:money_qr/models/payment.dart';
+import 'package:money_qr/models/recipient.dart';
 import 'package:money_qr/providers/payment_provider.dart';
 import 'package:money_qr/screens/recipients_list_screen.dart';
 import 'package:provider/provider.dart';
 
 class EditPaymentScreen extends StatefulWidget {
-  static const routeName = "/edit/";
+  static const routeName = "/payment/edit/";
 
   @override
   _EditPaymentScreenState createState() => _EditPaymentScreenState();
 }
 
 class _EditPaymentScreenState extends State<EditPaymentScreen> {
+  static const contactsBoxName = "paymentContacts";
   final _paymentFormKey = GlobalKey<FormState>();
+  TextEditingController toController = TextEditingController();
+  TextEditingController ibanController = TextEditingController();
+  TextEditingController bicController = TextEditingController();
+  TextEditingController currencyController = TextEditingController();
 
   SepaPayment _payment;
   PaymentProvider _paymentProvider;
@@ -36,6 +43,15 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
     await _paymentProvider.savePayment();
   }
 
+  void updateForm() {
+   if (_payment != null) {
+      toController.text = _payment.recipient;
+      ibanController.text = _payment.iban;
+      bicController.text = _payment.bic;
+      currencyController.text = _payment.currency;
+    }
+  }
+
   @override
   void didChangeDependencies() {
     if (!_isInit) {
@@ -44,7 +60,9 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
     }
     print("DidChange Edit Dependencies");
     _payment = _paymentProvider.payment;
+    print("Payment: $_payment");
     _isValid = _payment.valid;
+    updateForm();
     super.didChangeDependencies();
   }
 
@@ -66,15 +84,16 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 autovalidateMode: AutovalidateMode.always,
                 key: _paymentFormKey,
                 child: Column(children: [
-                  Text("Bearbeiten", style: _theme.textTheme.headline5,),
+                  Text("Zahlung", style: _theme.textTheme.headline5,),
                   const SizedBox(height: 16.0),
                   Row(
                     children: [
                       Flexible(
                         child: TextFormField(
+                          controller: toController,
                           decoration: InputDecoration(labelText: "An"),
                           textInputAction: TextInputAction.next,
-                          initialValue: _payment.recipient,
+                          readOnly: true,
                           validator: (value) {
                             String sanitizedVal = value.trim();
                             if (sanitizedVal.isEmpty || sanitizedVal.length < 5)
@@ -94,8 +113,9 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                             MaterialPageRoute(builder: (context) => RecipientsListScreen())
                         );
                         if (result != null) {
-                          _paymentProvider.update(result);
-                          _paymentFormKey.currentState.reset();
+                          PaymentRecipient recipient = Hive.box<PaymentRecipient>(contactsBoxName).getAt(result);
+                          SepaPayment payment = SepaPayment.fromRecipient(recipient);
+                          _paymentProvider.update(payment);
                         }
                       }),
                     ],
@@ -104,7 +124,8 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                   TextFormField(
                     decoration: InputDecoration(labelText: "IBAN"),
                     textInputAction: TextInputAction.next,
-                    initialValue: _payment.iban,
+                    controller: ibanController,
+                    readOnly: true,
                     validator: (value) {
                       String sanitizedVal = value.trim().replaceAll(' ', '');
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 15)
@@ -125,7 +146,8 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                   TextFormField(
                     decoration: InputDecoration(labelText: "BIC / SWIFT"),
                     textInputAction: TextInputAction.next,
-                    initialValue: _payment.bic,
+                    controller: bicController,
+                    readOnly: true,
                     validator: (value) {
                       String sanitizedVal = value.trim();
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
@@ -151,7 +173,8 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                         child: TextFormField(
                           decoration: InputDecoration(labelText: "Währung"),
                           textInputAction: TextInputAction.next,
-                          initialValue: _payment.currency,
+                          controller: currencyController,
+                          readOnly: true,
                           validator: (value) {
                             String sanitizedVal = value.trim();
                             if (sanitizedVal.isEmpty || sanitizedVal.length < 3)

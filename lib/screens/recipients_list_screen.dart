@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:money_qr/models/payment.dart';
-import 'package:money_qr/providers/payment_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:money_qr/screens/edit_recipient_screen.dart';
 
+import '../models/payment.dart';
 import '../models/recipient.dart';
 
 class RecipientsListScreen extends StatefulWidget {
-  static const routeName = "/saved/";
+  static const routeName = "/recipient/list/";
 
   @override
   _RecipientsListScreenState createState() => _RecipientsListScreenState();
 }
 
 class _RecipientsListScreenState extends State<RecipientsListScreen> {
-  List<PaymentRecipient> savedRecipients = [
-    PaymentRecipient(iban: "DE33 1002 0500 0001 1947 00", bic: "BFSWDE33BER", name: "Wikimedia Foerdergesellschaft"),
-  ];
+  static const contactsBoxName = "paymentContacts";
 
   Widget savedPaymentRecipientItemBuilder(BuildContext context, int index) {
-    final recipient = savedRecipients[index];
+    final recipient = Hive.box<PaymentRecipient>(contactsBoxName).values.toList()[index];
     return ListTile(
       title: Text(recipient.name),
       subtitle: Text("${recipient.iban}\n${recipient.bic} - ${recipient.currency}"),
       onTap: () {
-        SepaPayment payment = SepaPayment.fromRecipient(recipient);
-        Navigator.of(context).pop(payment);
+        Navigator.of(context).pop(index);
+      },
+      onLongPress: () {
+        Navigator.of(context).pushNamed(EditRecipientScreen.routeName, arguments: {'id': index});
       },
     );
   }
@@ -36,11 +37,22 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
       appBar: AppBar(
         title: Text("Saved Payment Contacts"),
       ),
+      floatingActionButton: FloatingActionButton(child: Icon(Icons.add), onPressed: () {
+        Navigator.of(context).pushNamed(EditRecipientScreen.routeName);
+      },),
       body: SafeArea(
-        child: ListView.builder(
-            itemCount: savedRecipients.length,
-            itemBuilder: savedPaymentRecipientItemBuilder,
-        ),
+        child: ValueListenableBuilder(
+          valueListenable: Hive.box<PaymentRecipient>(contactsBoxName).listenable(),
+          builder: (context, Box<PaymentRecipient> box, _) {
+            if (box.values.isEmpty)
+              return Center(
+                child: Text("Keine Empfänger vorhanden"),
+              );
+            return ListView.builder(
+              itemCount: box.values.length,
+              itemBuilder: savedPaymentRecipientItemBuilder,
+            );
+          }),
       ),
     );
   }

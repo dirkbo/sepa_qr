@@ -11,7 +11,7 @@ class SepaPayment {
   double amount;
 
   SepaPayment({
-    this.iban : "DE33100205000001194700",
+    this.iban : "DE33 1002 0500 0001 1947 00",
     this.bic : "BFSWDE33BER",
     this.recipient : "Wikimedia Foerdergesellschaft",
     this.message : "Spende fuer Wikipedia",
