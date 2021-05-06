@@ -17,10 +17,6 @@ class EditPaymentScreen extends StatefulWidget {
 class _EditPaymentScreenState extends State<EditPaymentScreen> {
   static const contactsBoxName = "paymentContacts";
   final _paymentFormKey = GlobalKey<FormState>();
-  TextEditingController toController = TextEditingController();
-  TextEditingController ibanController = TextEditingController();
-  TextEditingController bicController = TextEditingController();
-  TextEditingController currencyController = TextEditingController();
 
   SepaPayment _payment;
   PaymentProvider _paymentProvider;
@@ -43,14 +39,6 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
     await _paymentProvider.savePayment();
   }
 
-  void updateForm() {
-   if (_payment != null) {
-      toController.text = _payment.recipient;
-      ibanController.text = _payment.iban;
-      bicController.text = _payment.bic;
-      currencyController.text = _payment.currency;
-    }
-  }
 
   @override
   void didChangeDependencies() {
@@ -58,12 +46,21 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
       _paymentProvider = Provider.of<PaymentProvider>(context, listen: true);
       _isInit = true;
     }
-    print("DidChange Edit Dependencies");
     _payment = _paymentProvider.payment;
-    print("Payment: $_payment");
     _isValid = _payment.valid;
-    updateForm();
     super.didChangeDependencies();
+  }
+
+  Future<void> selectFromRecipientList() async {
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => RecipientsListScreen())
+    );
+    if (result != null) {
+      PaymentRecipient recipient = Hive.box<PaymentRecipient>(contactsBoxName).getAt(result);
+      SepaPayment payment = SepaPayment.fromRecipient(recipient);
+      _paymentProvider.update(payment);
+    }
   }
 
   @override
@@ -86,113 +83,36 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 child: Column(children: [
                   Text("Zahlung", style: _theme.textTheme.headline5,),
                   const SizedBox(height: 16.0),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton(child: Text("Empfänger wählen "), onPressed: selectFromRecipientList,),
+                        IconButton(icon: Icon(Icons.contacts), color: Colors.blue, onPressed: selectFromRecipientList),
+                      ]),
+                  const SizedBox(height: 8.0),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: TextFormField(
-                          controller: toController,
-                          decoration: InputDecoration(labelText: "An"),
-                          textInputAction: TextInputAction.next,
-                          readOnly: true,
-                          validator: (value) {
-                            String sanitizedVal = value.trim();
-                            if (sanitizedVal.isEmpty || sanitizedVal.length < 5)
-                              return 'Empfänger angeben';
-                            return null;
-                          },
-                          onSaved: (value) {
-                            String sanitizedVal = value.trim();
-                            _payment.recipient = sanitizedVal;
-                          },
-                          onChanged: (value) {checkValid(); },
-                        ),
-                      ),
-                      IconButton(icon: Icon(Icons.contacts), onPressed: () async {
-                        final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => RecipientsListScreen())
-                        );
-                        if (result != null) {
-                          PaymentRecipient recipient = Hive.box<PaymentRecipient>(contactsBoxName).getAt(result);
-                          SepaPayment payment = SepaPayment.fromRecipient(recipient);
-                          _paymentProvider.update(payment);
-                        }
-                      }),
+                      Text("An:"),
+                      Text(_payment.recipient),
                     ],
                   ),
                   const SizedBox(height: 8.0),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: "IBAN"),
-                    textInputAction: TextInputAction.next,
-                    controller: ibanController,
-                    readOnly: true,
-                    validator: (value) {
-                      String sanitizedVal = value.trim().replaceAll(' ', '');
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 15)
-                        return 'IBAN muss mindestens 15 Zeichen lang sein';
-                      if (sanitizedVal.length > 32)
-                        return 'IBAN darf maximal 32 Zeichen lang sein';
-                      if (!SepaPayment.isValidIBAN(sanitizedVal))
-                        return "IBAN ist ungültig!";
-                      return null;
-                    },
-                    onSaved: (value) {
-                      String sanitizedVal = value.trim();
-                      _payment.iban = sanitizedVal;
-                    },
-                    onChanged: (value) {checkValid(); },
-                  ),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('IBAN:'),
+                    Text(_payment.iban),
+                  ],),
                   const SizedBox(height: 8.0),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: "BIC / SWIFT"),
-                    textInputAction: TextInputAction.next,
-                    controller: bicController,
-                    readOnly: true,
-                    validator: (value) {
-                      String sanitizedVal = value.trim();
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
-                        return 'BIC muss mindestens 8 Zeichen lang sein';
-                      if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
-                        return 'BIC darf 8 oder  11 Zeichen lang sein';
-                      //if (!SepaPayment.isValidIBAN(sanitizedVal))
-                      //  return "BIC ist ungültig!";
-                      return null;
-                    },
-                    onSaved: (value) {
-                      String sanitizedVal = value.trim();
-                      _payment.bic = sanitizedVal;
-                    },
-                    onChanged: (value) {checkValid(); },
-                  ),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('BIC:'),
+                      Text(_payment.bic),
+                    ],),
                   const SizedBox(height: 8.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Flexible(
-                        child: TextFormField(
-                          decoration: InputDecoration(labelText: "Währung"),
-                          textInputAction: TextInputAction.next,
-                          controller: currencyController,
-                          readOnly: true,
-                          validator: (value) {
-                            String sanitizedVal = value.trim();
-                            if (sanitizedVal.isEmpty || sanitizedVal.length < 3)
-                              return 'Währung muss mindestens 3 Zeichen lang sein';
-                            //if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
-                            //  return 'BIC darf 8 oder  11 Zeichen lang sein';
-                            //if (!SepaPayment.isValidIBAN(sanitizedVal))
-                            //  return "BIC ist ungültig!";
-                            return null;
-                          },
-                          onSaved: (value) {
-                            String sanitizedVal = value.trim().toUpperCase();
-                            _payment.currency = sanitizedVal;
-                          },
-                          onChanged: (value) {checkValid(); },
-                        ),
-                      ),
-                      const SizedBox(width: 16.0,),
                       Flexible(
                         child: TextFormField(
                           textInputAction: TextInputAction.done,
@@ -212,6 +132,8 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                           onChanged: (value) {checkValid(); },
                         ),
                       ),
+                      const SizedBox(width: 16.0,),
+                      Text(_payment.currency),
                     ],
                   ),
                   const SizedBox(height: 8.0),

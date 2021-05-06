@@ -20,7 +20,7 @@ class SepaPayment {
   });
 
   SepaPayment.fromRecipient(PaymentRecipient recipient)
-    : iban = recipient.iban,
+    : iban = recipient.prettyIBAN,
       bic = recipient.bic,
       recipient = recipient.name,
       currency = recipient.currency,

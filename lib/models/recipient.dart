@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:iban/iban.dart' as IBAN;
 import 'package:hive/hive.dart';
 
@@ -25,6 +24,24 @@ class PaymentRecipient {
   bool get valid {
     if (iban == null) return false;
     return IBAN.isValid(iban);
+  }
+
+  String get cleanedIBAN {
+    return iban.trim().replaceAll(' ', '');
+  }
+
+  String get prettyIBAN {
+    String prettyIn = cleanedIBAN;
+    String prettyOut = '';
+    for(int i=0;i<prettyIn.length; i++) {
+      if (i==0)
+        prettyOut = prettyIn[0];
+      else if (i%4==0)
+        prettyOut = "$prettyOut ${prettyIn[i]}";
+      else
+        prettyOut = "$prettyOut${prettyIn[i]}";
+    }
+    return prettyOut;
   }
 
 }
