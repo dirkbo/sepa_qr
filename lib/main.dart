@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:money_qr/models/recipient.dart';
 import 'package:money_qr/providers/payment_provider.dart';
 import 'package:money_qr/screens/edit_payment_screen.dart';
 import 'package:money_qr/screens/edit_recipient_screen.dart';
-import 'package:money_qr/screens/recipients_list_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/paymentqr_screen.dart';
@@ -34,7 +32,7 @@ class MoneyQR extends StatelessWidget {
       title: 'Money QR',
       theme: ThemeData(primarySwatch: Colors.blue,),
       routes: {
-        MoneyQRHomePage.routeName: (ctx) => MoneyQRHomePage(title: "Money QR",),
+        MoneyQRHomePage.routeName: (ctx) => MoneyQRHomePage(title: "Money QR"),
         EditPaymentScreen.routeName: (ctx) => EditPaymentScreen(),
         //RecipientsListScreen.routeName: (ctx) => RecipientsListScreen(),
         EditRecipientScreen.routeName: (ctx) => EditRecipientScreen(),

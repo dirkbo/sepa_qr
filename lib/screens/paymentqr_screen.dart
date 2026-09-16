@@ -9,7 +9,7 @@ import '../models/payment.dart';
 class MoneyQRHomePage extends StatefulWidget {
   static const routeName = "/";
 
-  MoneyQRHomePage({Key key, this.title}) : super(key: key);
+  MoneyQRHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -21,9 +21,9 @@ class MoneyQRHomePage extends StatefulWidget {
 
 class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
   SepaPayment paymentData = SepaPayment();
-  String qrData;
+  String? qrData;
   bool _isInit = false;
-  PaymentProvider paymentProvider;
+  PaymentProvider? paymentProvider;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
     super.initState();
   }
 
-  void updateQrData({bool doSetState : false}) {
+  void updateQrData({bool doSetState = false}) {
     if (doSetState) {
       setState(() {
         qrData = paymentData.qrData;
@@ -45,10 +45,10 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
   void didChangeDependencies() {
     if (!_isInit) {
       paymentProvider = Provider.of<PaymentProvider>(context, listen: true);
-      Future.delayed(Duration(milliseconds: 200), () async { await paymentProvider.getFromPrefs(doNotify: true); });
+      Future.delayed(Duration(milliseconds: 200), () async { await paymentProvider?.getFromPrefs(doNotify: true); });
       _isInit = true;
     }
-    paymentData = paymentProvider.payment;
+    paymentData = paymentProvider?.payment ?? SepaPayment();
     updateQrData();
     super.didChangeDependencies();
   }
@@ -70,7 +70,7 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text("Deine Überweisung", style: _theme.textTheme.headline5, softWrap: true,),
+                      Text("Deine Überweisung", style: _theme.textTheme.headlineMedium, softWrap: true,),
                     ],),
                   const SizedBox(height: 16.0),
                   Row(
@@ -108,8 +108,8 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
                       Text("${paymentData.currency} ${paymentData.amount.toStringAsFixed(2)}"),
                     ],),
                   const SizedBox(height: 16.0,),
-                  QrImage(
-                    data: qrData,
+                  QrImageView(
+                    data: qrData ?? "",
                     version: QrVersions.auto,
                     size: 320,
                     gapless: false,

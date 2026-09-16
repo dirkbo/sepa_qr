@@ -11,12 +11,12 @@ class SepaPayment {
   double amount;
 
   SepaPayment({
-    this.iban : "DE33 1002 0500 0001 1947 00",
-    this.bic : "BFSWDE33BER",
-    this.recipient : "Wikimedia Foerdergesellschaft",
-    this.message : "Spende fuer Wikipedia",
-    this.amount : 0.00,
-    this.currency : "EUR"
+    this.iban = "DE33 1002 0500 0001 1947 00",
+    this.bic = "BFSWDE33BER",
+    this.recipient = "Wikimedia Foerdergesellschaft",
+    this.message = "Spende fuer Wikipedia",
+    this.amount = 0.00,
+    this.currency = "EUR"
   });
 
   SepaPayment.fromRecipient(PaymentRecipient recipient)
@@ -29,7 +29,6 @@ class SepaPayment {
   ;
 
   bool get valid {
-    if (iban == null) return false;
     return IBAN.isValid(iban);
   }
 
@@ -49,10 +48,10 @@ class SepaPayment {
   static Future<SepaPayment> get getFromPrefs async {
     SepaPayment n = new SepaPayment();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    n.iban = prefs.getString('iban');
-    n.bic = prefs.getString('bic');
-    n.recipient = prefs.getString('recipient');
-    n.currency = prefs.getString('curreny');
+    n.iban = prefs.getString('iban') ?? "DE33 1002 0500 0001 1947 00";
+    n.bic = prefs.getString('bic') ?? "BFSWDE33BER";
+    n.recipient = prefs.getString('recipient') ?? "Wikimedia Foerdergesellschaft";
+    n.currency = prefs.getString('curreny') ?? "EUR";
     n.amount = 0.0;
     n.message = "";
     if (!n.valid) {

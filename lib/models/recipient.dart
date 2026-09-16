@@ -15,14 +15,13 @@ class PaymentRecipient {
   String currency;
 
   PaymentRecipient({
-    this.iban,
-    this.bic,
-    this.name,
-    this.currency : "EUR"
+    this.iban = "",
+    this.bic = "",
+    this.name = "",
+    this.currency = "EUR"
   });
 
   bool get valid {
-    if (iban == null) return false;
     return IBAN.isValid(iban);
   }
 

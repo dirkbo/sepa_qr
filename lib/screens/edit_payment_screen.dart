@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:money_qr/models/payment.dart';
@@ -18,23 +17,20 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
   static const contactsBoxName = "paymentContacts";
   final _paymentFormKey = GlobalKey<FormState>();
 
-  SepaPayment _payment;
-  PaymentProvider _paymentProvider;
+  SepaPayment _payment = new SepaPayment();
+  PaymentProvider _paymentProvider = PaymentProvider();
   bool _isInit = false;
   bool _isValid = false;
 
   void checkValid() {
-    final bool valid  = (
-        _paymentFormKey.currentState != null &&
-            _paymentFormKey.currentState.validate()
-    );
+    final bool valid = _paymentFormKey.currentState?.validate() ?? false;
     setState(() {
       _isValid = valid;
     });
   }
 
   Future<void> savePayment() async {
-    _paymentFormKey.currentState.save();
+    _paymentFormKey.currentState?.save();
     _paymentProvider.update(_payment);
     await _paymentProvider.savePayment();
   }
@@ -57,7 +53,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
         MaterialPageRoute(builder: (context) => RecipientsListScreen())
     );
     if (result != null) {
-      PaymentRecipient recipient = Hive.box<PaymentRecipient>(contactsBoxName).getAt(result);
+      PaymentRecipient recipient = Hive.box<PaymentRecipient>(contactsBoxName).getAt(result) as PaymentRecipient;
       SepaPayment payment = SepaPayment.fromRecipient(recipient);
       _paymentProvider.update(payment);
     }
@@ -66,8 +62,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData _theme = Theme.of(context);
-    if (_paymentProvider.payment != null)
-      _payment = _paymentProvider.payment;
+    _payment = _paymentProvider.payment;
     return Scaffold(
       appBar: AppBar(
         title: Text("Zahlung bearbeiten"),
@@ -81,7 +76,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 autovalidateMode: AutovalidateMode.always,
                 key: _paymentFormKey,
                 child: Column(children: [
-                  Text("Zahlung", style: _theme.textTheme.headline5,),
+                  Text("Zahlung", style: _theme.textTheme.headlineMedium,),
                   const SizedBox(height: 16.0),
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -120,14 +115,14 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                           decoration: InputDecoration(labelText: "Betrag"),
                           initialValue: _payment.amount.toString(),
                           validator: (value) {
-                            String sanitizedVal = value.trim();
+                            String sanitizedVal = value?.trim() ?? '';
                             if (double.tryParse(sanitizedVal) == null)
                               return "Betrag muss eine Zahl sein!";
                             return null;
                           },
                           onSaved: (value) {
-                            String sanitizedVal = value.trim();
-                            _payment.amount = double.tryParse(sanitizedVal);
+                            String sanitizedVal = value?.trim() ?? '';
+                            _payment.amount = double.tryParse(sanitizedVal) ?? 0.0;
                           },
                           onChanged: (value) {checkValid(); },
                         ),
@@ -141,7 +136,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                     decoration: InputDecoration(labelText: "Nachricht"),
                     initialValue: _payment.message,
                     validator: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       //if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
                       //  return 'BIC muss mindestens 8 Zeichen lang sein';
                       if (sanitizedVal.length > 25 )// && sanitizedVal.length != 11)
@@ -151,7 +146,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                       return null;
                     },
                     onSaved: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       _payment.message = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },

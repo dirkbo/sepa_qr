@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hive/hive.dart';
 import 'package:money_qr/screens/edit_recipient_screen.dart';
 
-import '../models/payment.dart';
 import '../models/recipient.dart';
 
 class RecipientsListScreen extends StatefulWidget {
@@ -16,12 +14,12 @@ class RecipientsListScreen extends StatefulWidget {
 class _RecipientsListScreenState extends State<RecipientsListScreen> {
   static const contactsBoxName = "paymentContacts";
   static const maxWidth = 400.0;
-  MediaQueryData media;
+  MediaQueryData? media;
 
   Widget savedPaymentRecipientItemBuilder(BuildContext context, int index) {
     final recipient =
         Hive.box<PaymentRecipient>(contactsBoxName).values.toList()[index];
-    if (media.size.width > maxWidth)
+    if (media!.size.width > maxWidth)
       return Align(
         alignment: Alignment.center,
         child: Container(
@@ -68,7 +66,6 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData _theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Gespeicherte Empfänger"),

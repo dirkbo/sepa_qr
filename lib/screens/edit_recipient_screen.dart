@@ -15,41 +15,39 @@ class EditRecipientScreen extends StatefulWidget {
 class _EditRecipientScreenState extends State<EditRecipientScreen> {
   static const contactsBoxName = "paymentContacts";
   final _recipientFormKey = GlobalKey<FormState>();
-  Box<PaymentRecipient> box;
+  Box<PaymentRecipient>? box;
 
   PaymentRecipient _recipient = PaymentRecipient();
   bool _modeCreate = true;
-  int _originalId;
+  int? _originalId;
   bool _isInit = false;
   bool _isValid = false;
 
   void checkValid() {
-    final bool valid  = (
-        _recipientFormKey.currentState != null &&
-            _recipientFormKey.currentState.validate()
-    );
+    final bool valid  = _recipientFormKey.currentState?.validate() ?? false;
     setState(() {
       _isValid = valid;
     });
   }
 
   Future<void> savePayment() async {
-    _recipientFormKey.currentState.save();
+    _recipientFormKey.currentState?.save();
     if (_modeCreate && _originalId == null) {
-      box.add(_recipient);
+      box?.add(_recipient);
     } else {
-      box.put(_originalId, _recipient);
+      box?.put(_originalId, _recipient);
     }
   }
 
   @override
   void didChangeDependencies() {
     if (!_isInit) {
-      final Map<String, dynamic> args = ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
+      final Map<String, dynamic> args =
+          (ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?) ?? {};
       _isValid = false;
       _originalId = null;
       _modeCreate = true;
-      if (args != null && args.containsKey('id')) {
+      if (args.containsKey('id')) {
         _originalId = args['id'] as int;
         _modeCreate = false;
       }
@@ -58,8 +56,13 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
     }
     if (_originalId != null)
       setState(() {
-        _recipient = box.getAt(_originalId);
-        _isValid = _recipient != null ?  _recipient.valid : false;
+        if (_originalId != null) {
+          _recipient = box?.getAt(_originalId!) ?? PaymentRecipient();
+          _isValid = _recipient.valid;
+        } else {
+          _recipient = PaymentRecipient();
+          _isValid = false;
+        }
       });
     print("DidChange Edit Dependencies");
     super.didChangeDependencies();
@@ -81,20 +84,20 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                 autovalidateMode: AutovalidateMode.always,
                 key: _recipientFormKey,
                 child: Column(children: [
-                  Text("Empfänger", style: _theme.textTheme.headline5,),
+                  Text("Empfänger", style: _theme.textTheme.headlineMedium,),
                   const SizedBox(height: 16.0),
                   TextFormField(
                     decoration: InputDecoration(labelText: "An"),
                     textInputAction: TextInputAction.next,
-                    initialValue: _recipient != null ? _recipient.name : '',
+                    initialValue: _recipient.name,
                     validator: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 5)
                         return 'Empfänger angeben';
                       return null;
                     },
                     onSaved: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       _recipient.name = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
@@ -103,9 +106,9 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                   TextFormField(
                     decoration: InputDecoration(labelText: "IBAN"),
                     textInputAction: TextInputAction.next,
-                    initialValue: _recipient != null ? _recipient.iban : '',
+                    initialValue: _recipient.iban,
                     validator: (value) {
-                      String sanitizedVal = value.trim().replaceAll(' ', '');
+                      String sanitizedVal = (value?.trim() ?? '').replaceAll(' ', '');
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 15)
                         return 'IBAN muss mindestens 15 Zeichen lang sein';
                       if (sanitizedVal.length > 32)
@@ -115,7 +118,7 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                       return null;
                     },
                     onSaved: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       _recipient.iban = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
@@ -124,9 +127,9 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                   TextFormField(
                     decoration: InputDecoration(labelText: "BIC / SWIFT"),
                     textInputAction: TextInputAction.next,
-                    initialValue: _recipient != null ?  _recipient.bic : '',
+                    initialValue: _recipient.bic,
                     validator: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
                         return 'BIC muss mindestens 8 Zeichen lang sein';
                       if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
@@ -136,7 +139,7 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                       return null;
                     },
                     onSaved: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       _recipient.bic = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
@@ -145,9 +148,9 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                   TextFormField(
                     decoration: InputDecoration(labelText: "Währung"),
                     textInputAction: TextInputAction.next,
-                    initialValue: _recipient != null ?  _recipient.currency : "EUR",
+                    initialValue: _recipient.currency,
                     validator: (value) {
-                      String sanitizedVal = value.trim();
+                      String sanitizedVal = value?.trim() ?? '';
                       if (sanitizedVal.isEmpty || sanitizedVal.length < 3)
                         return 'Währung muss mindestens 3 Zeichen lang sein';
                       //if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
@@ -157,7 +160,7 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                       return null;
                     },
                     onSaved: (value) {
-                      String sanitizedVal = value.trim().toUpperCase();
+                      String sanitizedVal = (value?.trim() ?? '').toUpperCase();
                       _recipient.currency = sanitizedVal;
                     },
                     onChanged: (value) {checkValid(); },
