@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -187,15 +188,18 @@ class _ShareSheet extends StatelessWidget {
             const SizedBox(height: 16.0),
             Text("Teilen als", style: theme.textTheme.titleMedium),
             const SizedBox(height: 4.0),
-            _ShareOptionTile(
-              icon: Icons.qr_code,
-              title: "QR-Code als Bild",
-              subtitle: "PNG zum Weiterleiten oder Ausdrucken",
-              onTap: () {
-                Navigator.of(context).pop();
-                _shareQrImage(payment);
-              },
-            ),
+            // On web, sharing an image and saving one both just trigger the
+            // same browser download, so showing both is redundant.
+            if (!kIsWeb)
+              _ShareOptionTile(
+                icon: Icons.qr_code,
+                title: "QR-Code als Bild",
+                subtitle: "PNG zum Weiterleiten oder Ausdrucken",
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _shareQrImage(payment);
+                },
+              ),
             _ShareOptionTile(
               icon: Icons.description_outlined,
               title: "Zahlungsdaten als Text",
