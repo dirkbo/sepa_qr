@@ -51,8 +51,9 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
       leading: CircleAvatar(
         child: Text(recipient.name[0]),
       ),
-      subtitle: Text(
-          "${recipient.prettyIBAN}\n${recipient.bic} - ${recipient.currency}"),
+      subtitle: Text(recipient.bic.trim().isEmpty
+          ? "${recipient.prettyIBAN}\n${recipient.currency}"
+          : "${recipient.prettyIBAN}\n${recipient.bic} - ${recipient.currency}"),
       onTap: () {
         Navigator.of(context).pop(index);
       },

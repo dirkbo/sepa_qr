@@ -94,13 +94,15 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
                       Text("IBAN:"),
                       Text(paymentData.iban),
                     ],),
-                  const SizedBox(height: 8.0,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("BIC:"),
-                      Text(paymentData.bic),
-                    ],),
+                  if (paymentData.bic.trim().isNotEmpty) ...[
+                    const SizedBox(height: 8.0,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("BIC:"),
+                        Text(paymentData.bic),
+                      ],),
+                  ],
                   const SizedBox(height: 8.0,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -99,12 +99,14 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                     Text('IBAN:'),
                     Text(_payment.iban),
                   ],),
-                  const SizedBox(height: 8.0),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('BIC:'),
-                      Text(_payment.bic),
-                    ],),
+                  if (_payment.bic.trim().isNotEmpty) ...[
+                    const SizedBox(height: 8.0),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('BIC:'),
+                        Text(_payment.bic),
+                      ],),
+                  ],
                   const SizedBox(height: 8.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

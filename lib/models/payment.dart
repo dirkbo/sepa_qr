@@ -67,7 +67,9 @@ class SepaPayment {
 
   String get qrData {
     return "BCD\n"
-        "001\n"
+        // Version 002 (vs. 001) allows the BIC line to be left blank, which
+        // is required for the IBAN-only SEPA payments this app can generate.
+        "002\n"
         "1\n"
         "SCT\n"
         "$bic\n"

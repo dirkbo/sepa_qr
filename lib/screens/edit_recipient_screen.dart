@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 
 import '../models/payment.dart';
 import '../models/recipient.dart';
+import '../models/sepa.dart';
 
 
 class EditRecipientScreen extends StatefulWidget {
@@ -24,6 +25,11 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
   int? _originalId;
   bool _isInit = false;
   bool _isValid = false;
+
+  // Tracks the IBAN/currency fields' live (unsaved) text, since the BIC
+  // field's own validator needs to know about them as the user types.
+  String _currentIban = '';
+  String _currentCurrency = 'EUR';
 
   void checkValid() {
     final bool valid  = _recipientFormKey.currentState?.validate() ?? false;
@@ -61,6 +67,8 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
         if (_originalId != null) {
           _recipient = box?.getAt(_originalId!) ?? PaymentRecipient();
           _isValid = _recipient.valid;
+          _currentIban = _recipient.iban;
+          _currentCurrency = _recipient.currency;
         } else {
           _recipient = PaymentRecipient();
           _isValid = false;
@@ -127,16 +135,30 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                       String sanitizedVal = value?.trim() ?? '';
                       _recipient.iban = sanitizedVal;
                     },
-                    onChanged: (value) {checkValid(); },
+                    onChanged: (value) {
+                      _currentIban = value;
+                      checkValid();
+                    },
                   ),
                   const SizedBox(height: 8.0),
                   TextFormField(
-                    decoration: InputDecoration(labelText: "BIC / SWIFT"),
+                    decoration: InputDecoration(
+                      labelText: isBicRequired(
+                              iban: _currentIban, currency: _currentCurrency)
+                          ? "BIC / SWIFT"
+                          : "BIC / SWIFT (optional)",
+                    ),
                     textInputAction: TextInputAction.next,
                     initialValue: _recipient.bic,
                     validator: (value) {
                       String sanitizedVal = value?.trim() ?? '';
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 8) {
+                      if (sanitizedVal.isEmpty) {
+                        return isBicRequired(
+                                iban: _currentIban, currency: _currentCurrency)
+                            ? 'BIC erforderlich (außerhalb SEPA oder in Fremdwährung)'
+                            : null;
+                      }
+                      if (sanitizedVal.length < 8) {
                         return 'BIC muss mindestens 8 Zeichen lang sein';
                       }
                       if (sanitizedVal.length > 8 && sanitizedVal.length != 11) {
@@ -172,7 +194,10 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                       String sanitizedVal = (value?.trim() ?? '').toUpperCase();
                       _recipient.currency = sanitizedVal;
                     },
-                    onChanged: (value) {checkValid(); },
+                    onChanged: (value) {
+                      _currentCurrency = value;
+                      checkValid();
+                    },
                   ),
                   const SizedBox(height: 16.0),
                   Row(

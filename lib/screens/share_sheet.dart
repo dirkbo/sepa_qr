@@ -94,7 +94,7 @@ Future<Uint8List> _buildQrPngBytes(SepaPayment payment,
 String _paymentText(SepaPayment payment) {
   return "An: ${payment.recipient}\n"
       "IBAN: ${payment.iban}\n"
-      "BIC: ${payment.bic}\n"
+      "${payment.bic.trim().isNotEmpty ? "BIC: ${payment.bic}\n" : ""}"
       "Betrag: ${payment.currency} ${payment.amount.toStringAsFixed(2)}\n"
       "Nachricht: ${payment.message}";
 }
