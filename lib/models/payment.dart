@@ -1,4 +1,4 @@
-import 'package:iban/iban.dart' as IBAN;
+import 'package:iban/iban.dart' as iban_validator;
 import 'package:money_qr/models/recipient.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,11 +29,11 @@ class SepaPayment {
   ;
 
   bool get valid {
-    return IBAN.isValid(iban);
+    return iban_validator.isValid(iban);
   }
 
   static bool isValidIBAN(String iban) {
-    return IBAN.isValid(iban);
+    return iban_validator.isValid(iban);
   }
 
   Future<void> saveToPrefs() async {

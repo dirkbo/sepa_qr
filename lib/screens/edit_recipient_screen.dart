@@ -11,7 +11,7 @@ class EditRecipientScreen extends StatefulWidget {
   const EditRecipientScreen({super.key});
 
   @override
-  _EditRecipientScreenState createState() => _EditRecipientScreenState();
+  State<EditRecipientScreen> createState() => _EditRecipientScreenState();
 }
 
 class _EditRecipientScreenState extends State<EditRecipientScreen> {
@@ -67,7 +67,6 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
         }
       });
     }
-    print("DidChange Edit Dependencies");
     super.didChangeDependencies();
   }
 
@@ -186,6 +185,7 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                           onPressed: _isValid
                               ? () async {
                             await savePayment();
+                            if (!context.mounted) return;
                             Navigator.of(context).pop();
                           }
                               : null, child: Text("Übernehmen")),

@@ -1,4 +1,4 @@
-import 'package:iban/iban.dart' as IBAN;
+import 'package:iban/iban.dart' as iban_validator;
 import 'package:hive/hive.dart';
 
 part 'recipient.g.dart';
@@ -22,7 +22,7 @@ class PaymentRecipient {
   });
 
   bool get valid {
-    return IBAN.isValid(iban);
+    return iban_validator.isValid(iban);
   }
 
   String get cleanedIBAN {
@@ -35,10 +35,11 @@ class PaymentRecipient {
     for(int i=0;i<prettyIn.length; i++) {
       if (i==0) {
         prettyOut = prettyIn[0];
-      } else if (i%4==0)
+      } else if (i%4==0) {
         prettyOut = "$prettyOut ${prettyIn[i]}";
-      else
+      } else {
         prettyOut = "$prettyOut${prettyIn[i]}";
+      }
     }
     return prettyOut;
   }

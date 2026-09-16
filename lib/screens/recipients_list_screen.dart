@@ -10,7 +10,7 @@ class RecipientsListScreen extends StatefulWidget {
   const RecipientsListScreen({super.key});
 
   @override
-  _RecipientsListScreenState createState() => _RecipientsListScreenState();
+  State<RecipientsListScreen> createState() => _RecipientsListScreenState();
 }
 
 class _RecipientsListScreenState extends State<RecipientsListScreen> {
@@ -18,33 +18,35 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
   static const maxWidth = 400.0;
   MediaQueryData? media;
 
-  Widget savedPaymentRecipientItemBuilder(BuildContext context, int index) {
-    final recipient =
-        Hive.box<PaymentRecipient>(contactsBoxName).values.toList()[index];
-    if (media!.size.width > maxWidth) {
-      return Align(
-        alignment: Alignment.center,
-        child: SizedBox(
-          width: 400.0,
-          child: ListTile(
-            title: Text(recipient.name),
-            leading: CircleAvatar(
-              child: Text(recipient.name[0]),
-            ),
-            subtitle: Text(
-                "${recipient.prettyIBAN}\n${recipient.bic} - ${recipient.currency}"),
-            onTap: () {
-              Navigator.of(context).pop(index);
-            },
-            onLongPress: () {
-              Navigator.of(context).pushNamed(EditRecipientScreen.routeName,
-                  arguments: {'id': index});
-            },
+  Future<bool> confirmDeleteRecipient(
+      BuildContext context, PaymentRecipient recipient) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Empfänger löschen?"),
+        content: Text(
+            "Möchtest du \"${recipient.name}\" wirklich aus deinen gespeicherten Empfängern entfernen?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text("Abbrechen"),
           ),
-        ),
-      );
-    }
-    return ListTile(
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text("Löschen"),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  Widget savedPaymentRecipientItemBuilder(BuildContext context, int index) {
+    final box = Hive.box<PaymentRecipient>(contactsBoxName);
+    final recipient = box.values.toList()[index];
+    final dynamic recipientKey = box.keyAt(index);
+
+    final tile = ListTile(
       title: Text(recipient.name),
       leading: CircleAvatar(
         child: Text(recipient.name[0]),
@@ -59,6 +61,33 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
             arguments: {'id': index});
       },
     );
+
+    final dismissible = Dismissible(
+      key: ValueKey(recipientKey),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) => confirmDeleteRecipient(context, recipient),
+      onDismissed: (_) {
+        box.delete(recipientKey);
+      },
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: tile,
+    );
+
+    if (media!.size.width > maxWidth) {
+      return Align(
+        alignment: Alignment.center,
+        child: SizedBox(
+          width: 400.0,
+          child: dismissible,
+        ),
+      );
+    }
+    return dismissible;
   }
 
   @override

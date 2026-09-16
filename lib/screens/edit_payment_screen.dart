@@ -12,7 +12,7 @@ class EditPaymentScreen extends StatefulWidget {
   const EditPaymentScreen({super.key});
 
   @override
-  _EditPaymentScreenState createState() => _EditPaymentScreenState();
+  State<EditPaymentScreen> createState() => _EditPaymentScreenState();
 }
 
 class _EditPaymentScreenState extends State<EditPaymentScreen> {
@@ -167,6 +167,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                           onPressed: _isValid
                           ? () async {
                             await savePayment();
+                            if (!context.mounted) return;
                             Navigator.of(context).pop();
                             }
                           : null, child: Text("Übernehmen")),

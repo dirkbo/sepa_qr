@@ -14,7 +14,7 @@ class MoneyQRHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MoneyQRHomePageState createState() => _MoneyQRHomePageState();
+  State<MoneyQRHomePage> createState() => _MoneyQRHomePageState();
 }
 
 
