@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:money_qr/providers/payment_provider.dart';
 import 'package:money_qr/screens/edit_payment_screen.dart';
+import 'package:money_qr/screens/share_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -59,6 +60,13 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.ios_share),
+            tooltip: 'Teilen',
+            onPressed: () => showShareSheet(context, paymentData),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(
