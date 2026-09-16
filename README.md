@@ -10,6 +10,8 @@ typing in your IBAN by hand.
 - Generates an EPC QR code from an IBAN, BIC, recipient name, amount and
   payment reference
 - Address book of saved recipients, stored locally with [Hive](https://pub.dev/packages/hive)
+  - Swipe a recipient right to edit it, or left to delete it (with a
+    confirmation dialog first); long-press also opens the edit screen
 - Last-used payment details are remembered between launches (`shared_preferences`)
 - IBAN validation via the [`iban`](https://pub.dev/packages/iban) package
 - Runs on Android, Windows desktop and the web; the `ios/` project

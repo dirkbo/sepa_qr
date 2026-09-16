@@ -64,12 +64,25 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
 
     final dismissible = Dismissible(
       key: ValueKey(recipientKey),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (_) => confirmDeleteRecipient(context, recipient),
+      direction: DismissDirection.horizontal,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          Navigator.of(context).pushNamed(EditRecipientScreen.routeName,
+              arguments: {'id': index});
+          return false;
+        }
+        return confirmDeleteRecipient(context, recipient);
+      },
       onDismissed: (_) {
         box.delete(recipientKey);
       },
       background: Container(
+        color: Colors.blue,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: const Icon(Icons.edit, color: Colors.white),
+      ),
+      secondaryBackground: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
