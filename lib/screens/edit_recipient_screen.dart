@@ -8,6 +8,8 @@ import '../models/recipient.dart';
 class EditRecipientScreen extends StatefulWidget {
   static const routeName = "/recipient/edit/";
 
+  const EditRecipientScreen({super.key});
+
   @override
   _EditRecipientScreenState createState() => _EditRecipientScreenState();
 }
@@ -54,7 +56,7 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
       box = Hive.box<PaymentRecipient>(contactsBoxName);
       _isInit = true;
     }
-    if (_originalId != null)
+    if (_originalId != null) {
       setState(() {
         if (_originalId != null) {
           _recipient = box?.getAt(_originalId!) ?? PaymentRecipient();
@@ -64,27 +66,28 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
           _isValid = false;
         }
       });
+    }
     print("DidChange Edit Dependencies");
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData _theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(_modeCreate ? "Empfänger erstellen" : "Empfänger bearbeiten"),
       ),
       body: SafeArea(
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 300.0,
             child: SingleChildScrollView(
               child: Form(
                 autovalidateMode: AutovalidateMode.always,
                 key: _recipientFormKey,
                 child: Column(children: [
-                  Text("Empfänger", style: _theme.textTheme.headlineMedium,),
+                  Text("Empfänger", style: theme.textTheme.headlineMedium,),
                   const SizedBox(height: 16.0),
                   TextFormField(
                     decoration: InputDecoration(labelText: "An"),
@@ -92,8 +95,9 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                     initialValue: _recipient.name,
                     validator: (value) {
                       String sanitizedVal = value?.trim() ?? '';
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 5)
+                      if (sanitizedVal.isEmpty || sanitizedVal.length < 5) {
                         return 'Empfänger angeben';
+                      }
                       return null;
                     },
                     onSaved: (value) {
@@ -109,12 +113,15 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                     initialValue: _recipient.iban,
                     validator: (value) {
                       String sanitizedVal = (value?.trim() ?? '').replaceAll(' ', '');
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 15)
+                      if (sanitizedVal.isEmpty || sanitizedVal.length < 15) {
                         return 'IBAN muss mindestens 15 Zeichen lang sein';
-                      if (sanitizedVal.length > 32)
+                      }
+                      if (sanitizedVal.length > 32) {
                         return 'IBAN darf maximal 32 Zeichen lang sein';
-                      if (!SepaPayment.isValidIBAN(sanitizedVal))
+                      }
+                      if (!SepaPayment.isValidIBAN(sanitizedVal)) {
                         return "IBAN ist ungültig!";
+                      }
                       return null;
                     },
                     onSaved: (value) {
@@ -130,10 +137,12 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                     initialValue: _recipient.bic,
                     validator: (value) {
                       String sanitizedVal = value?.trim() ?? '';
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
+                      if (sanitizedVal.isEmpty || sanitizedVal.length < 8) {
                         return 'BIC muss mindestens 8 Zeichen lang sein';
-                      if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
+                      }
+                      if (sanitizedVal.length > 8 && sanitizedVal.length != 11) {
                         return 'BIC darf 8 oder  11 Zeichen lang sein';
+                      }
                       //if (!SepaPayment.isValidIBAN(sanitizedVal))
                       //  return "BIC ist ungültig!";
                       return null;
@@ -151,8 +160,9 @@ class _EditRecipientScreenState extends State<EditRecipientScreen> {
                     initialValue: _recipient.currency,
                     validator: (value) {
                       String sanitizedVal = value?.trim() ?? '';
-                      if (sanitizedVal.isEmpty || sanitizedVal.length < 3)
+                      if (sanitizedVal.isEmpty || sanitizedVal.length < 3) {
                         return 'Währung muss mindestens 3 Zeichen lang sein';
+                      }
                       //if (sanitizedVal.length > 8 && sanitizedVal.length != 11)
                       //  return 'BIC darf 8 oder  11 Zeichen lang sein';
                       //if (!SepaPayment.isValidIBAN(sanitizedVal))

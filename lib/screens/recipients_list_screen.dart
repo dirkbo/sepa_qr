@@ -7,6 +7,8 @@ import '../models/recipient.dart';
 class RecipientsListScreen extends StatefulWidget {
   static const routeName = "/recipient/list/";
 
+  const RecipientsListScreen({super.key});
+
   @override
   _RecipientsListScreenState createState() => _RecipientsListScreenState();
 }
@@ -19,10 +21,10 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
   Widget savedPaymentRecipientItemBuilder(BuildContext context, int index) {
     final recipient =
         Hive.box<PaymentRecipient>(contactsBoxName).values.toList()[index];
-    if (media!.size.width > maxWidth)
+    if (media!.size.width > maxWidth) {
       return Align(
         alignment: Alignment.center,
-        child: Container(
+        child: SizedBox(
           width: 400.0,
           child: ListTile(
             title: Text(recipient.name),
@@ -41,6 +43,7 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
           ),
         ),
       );
+    }
     return ListTile(
       title: Text(recipient.name),
       leading: CircleAvatar(
@@ -81,10 +84,11 @@ class _RecipientsListScreenState extends State<RecipientsListScreen> {
             valueListenable:
                 Hive.box<PaymentRecipient>(contactsBoxName).listenable(),
             builder: (context, Box<PaymentRecipient> box, _) {
-              if (box.values.isEmpty)
+              if (box.values.isEmpty) {
                 return Center(
                   child: Text("Keine Empfänger vorhanden"),
                 );
+              }
               return ListView.builder(
                 itemCount: box.values.length,
                 itemBuilder: savedPaymentRecipientItemBuilder,

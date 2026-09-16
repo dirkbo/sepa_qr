@@ -33,9 +33,9 @@ class PaymentRecipient {
     String prettyIn = cleanedIBAN;
     String prettyOut = '';
     for(int i=0;i<prettyIn.length; i++) {
-      if (i==0)
+      if (i==0) {
         prettyOut = prettyIn[0];
-      else if (i%4==0)
+      } else if (i%4==0)
         prettyOut = "$prettyOut ${prettyIn[i]}";
       else
         prettyOut = "$prettyOut${prettyIn[i]}";

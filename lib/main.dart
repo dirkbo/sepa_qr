@@ -25,6 +25,8 @@ void main() async {
 }
 
 class MoneyQR extends StatelessWidget {
+  const MoneyQR({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

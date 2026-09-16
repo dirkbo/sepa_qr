@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 class EditPaymentScreen extends StatefulWidget {
   static const routeName = "/payment/edit/";
 
+  const EditPaymentScreen({super.key});
+
   @override
   _EditPaymentScreenState createState() => _EditPaymentScreenState();
 }
@@ -17,7 +19,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
   static const contactsBoxName = "paymentContacts";
   final _paymentFormKey = GlobalKey<FormState>();
 
-  SepaPayment _payment = new SepaPayment();
+  SepaPayment _payment = SepaPayment();
   PaymentProvider _paymentProvider = PaymentProvider();
   bool _isInit = false;
   bool _isValid = false;
@@ -61,7 +63,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData _theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     _payment = _paymentProvider.payment;
     return Scaffold(
       appBar: AppBar(
@@ -69,18 +71,18 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
       ),
       body: SafeArea(
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 300.0,
             child: SingleChildScrollView(
               child: Form(
                 autovalidateMode: AutovalidateMode.always,
                 key: _paymentFormKey,
                 child: Column(children: [
-                  Text("Zahlung", style: _theme.textTheme.headlineMedium,),
+                  Text("Zahlung", style: theme.textTheme.headlineMedium,),
                   const SizedBox(height: 16.0),
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ElevatedButton(child: Text("Empfänger wählen "), onPressed: selectFromRecipientList,),
+                        ElevatedButton(onPressed: selectFromRecipientList,child: Text("Empfänger wählen "),),
                         IconButton(icon: Icon(Icons.contacts), color: Colors.blue, onPressed: selectFromRecipientList),
                       ]),
                   const SizedBox(height: 8.0),
@@ -116,8 +118,9 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                           initialValue: _payment.amount.toString(),
                           validator: (value) {
                             String sanitizedVal = value?.trim() ?? '';
-                            if (double.tryParse(sanitizedVal) == null)
+                            if (double.tryParse(sanitizedVal) == null) {
                               return "Betrag muss eine Zahl sein!";
+                            }
                             return null;
                           },
                           onSaved: (value) {
@@ -139,8 +142,10 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                       String sanitizedVal = value?.trim() ?? '';
                       //if (sanitizedVal.isEmpty || sanitizedVal.length < 8)
                       //  return 'BIC muss mindestens 8 Zeichen lang sein';
-                      if (sanitizedVal.length > 25 )// && sanitizedVal.length != 11)
+                      if (sanitizedVal.length > 25 ) {
+                        // && sanitizedVal.length != 11)
                         return 'Nachricht darf maximal 25 Zeichen lang sein'; // ToDo: ? Regeln
+                      }
                       //if (!SepaPayment.isValidIBAN(sanitizedVal))
                       //  return "BIC ist ungültig!";
                       return null;

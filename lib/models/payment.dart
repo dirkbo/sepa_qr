@@ -46,7 +46,7 @@ class SepaPayment {
   }
 
   static Future<SepaPayment> get getFromPrefs async {
-    SepaPayment n = new SepaPayment();
+    SepaPayment n = SepaPayment();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     n.iban = prefs.getString('iban') ?? "DE33 1002 0500 0001 1947 00";
     n.bic = prefs.getString('bic') ?? "BFSWDE33BER";
@@ -55,11 +55,12 @@ class SepaPayment {
     n.amount = 0.0;
     n.message = "";
     if (!n.valid) {
-      n = new SepaPayment();
+      n = SepaPayment();
     }
     return n;
   }
 
+  @override
   String toString() {
     return "$recipient $iban $bic $message $currency $amount";
   }

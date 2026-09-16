@@ -6,14 +6,15 @@ class PaymentProvider with ChangeNotifier {
   SepaPayment _payment = SepaPayment();
 
   PaymentProvider() {
-    _payment = new SepaPayment();
+    _payment = SepaPayment();
   }
 
   Future<void> getFromPrefs({bool doNotify= true}) async {
     final SepaPayment newPayment = await SepaPayment.getFromPrefs;
     _payment = newPayment;
-    if (doNotify)
+    if (doNotify) {
       notifyListeners();
+    }
   }
 
   Future<void> savePayment() async {

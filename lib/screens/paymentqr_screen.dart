@@ -9,7 +9,7 @@ import '../models/payment.dart';
 class MoneyQRHomePage extends StatefulWidget {
   static const routeName = "/";
 
-  MoneyQRHomePage({Key? key, required this.title}) : super(key: key);
+  const MoneyQRHomePage({super.key, required this.title});
 
   final String title;
 
@@ -55,7 +55,7 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData _theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -63,14 +63,14 @@ class _MoneyQRHomePageState extends State<MoneyQRHomePage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Container(
+            child: SizedBox(
               width: 300.0,
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text("Deine Überweisung", style: _theme.textTheme.headlineMedium, softWrap: true,),
+                      Text("Deine Überweisung", style: theme.textTheme.headlineMedium, softWrap: true,),
                     ],),
                   const SizedBox(height: 16.0),
                   Row(
